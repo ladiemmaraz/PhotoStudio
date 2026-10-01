@@ -8,29 +8,35 @@ jobs:
   build-mac:
     runs-on: macos-latest
     steps:
-            - uses: actions/checkout@v4
-            - uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-            - run: npm install
-            - run: npm run build-mac
-            - uses: actions/upload-artifact@v4
+      - name: Install
+        run: npm install --force
+      - name: Build Mac
+        run: npx electron-builder --mac --x64 --arm64 --publish=never
+      - uses: actions/upload-artifact@v4
         with:
           name: PhotoStudio-Mac-dmg
-          path: dist/*.dmg
+          path: dist/*.{dmg,zip}
+          if-no-files-found: warn
 
   build-win:
     runs-on: windows-latest
     steps:
-            - uses: actions/checkout@v4
-            - uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-            - run: npm install
-            - run: npm run build-win
-            - uses: actions/upload-artifact@v4
+      - name: Install
+        run: npm install --force
+      - name: Build Windows
+        run: npx electron-builder --win --x64 --publish=never
+      - uses: actions/upload-artifact@v4
         with:
           name: PhotoStudio-Windows-exe
           path: |
             dist/*.exe
             dist/*.zip
+          if-no-files-found: warn
