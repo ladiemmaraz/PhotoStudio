@@ -12,15 +12,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Install
-        run: npm install --force
-      - name: Build Mac
-        run: npx electron-builder --mac --x64 --arm64 --publish=never
+      - run: npm install --force
+      - run: npx electron-builder --mac --x64 --arm64 --publish=never
       - uses: actions/upload-artifact@v4
         with:
           name: PhotoStudio-Mac-dmg
-          path: dist/*.{dmg,zip}
-          if-no-files-found: warn
+          path: |
+            dist/*.dmg
+            dist/*.zip
 
   build-win:
     runs-on: windows-latest
@@ -29,14 +28,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Install
-        run: npm install --force
-      - name: Build Windows
-        run: npx electron-builder --win --x64 --publish=never
+      - run: npm install --force
+      - run: npx electron-builder --win --x64 --publish=never
       - uses: actions/upload-artifact@v4
         with:
           name: PhotoStudio-Windows-exe
           path: |
             dist/*.exe
             dist/*.zip
-          if-no-files-found: warn
