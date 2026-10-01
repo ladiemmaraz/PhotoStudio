@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photo & Animation Studio - Free Offline</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui;background:#0f0f10;color:#e5e7eb;min-height:100vh;display:flex;flex-direction:column}
+header{padding:14px 20px;background:#18181b;border-bottom:1px solid #27272a;display:flex;justify-content:space-between;align-items:center}
+header h1{font-size:18px;font-weight:600}
+header .badge{background:#7c3aed;color:#fff;padding:3px 8px;border-radius:20px;font-size:11px}
+main{display:flex;flex:1;overflow:hidden;flex-wrap:wrap}
+#left{width:300px;background:#18181b;border-right:1px solid #27272a;padding:16px;overflow-y:auto}
+#center{flex:1;background:#0a0a0b;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;min-width:320px}
+#right{width:320px;background:#18181b;border-left:1px solid #27272a;padding:16px;overflow-y:auto}
+.canvas-wrap{background:#1f1f23;border-radius:16px;padding:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);max-width:100%}
+canvas{background:#111;border-radius:12px;max-width:100%;display:block}
+.btn{background:#27272a;border:1px solid #3f3f46;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px;transition:.15s}
+.btn:hover{background:#3f3f46}
+.btn.primary{background:#7c3aed;border-color:#7c3aed}
+.btn.primary:hover{background:#6d28e0}
+.btn.small{padding:5px 9px;font-size:12px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.label{font-size:11px;color:#a1a1aa;text-transform:uppercase;letter-spacing:.05em;margin:14px 0 6px;display:block;font-weight:600}
+.range{width:100%;accent-color:#7c3aed}
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.filter-card{background:#27272a;border-radius:10px;padding:10px;text-align:center;cursor:pointer;border:1px solid transparent}
+.filter-card:hover{border-color:#7c3aed}
+.filter-card.active{border-color:#7c3aed;background:#2e2250}
+#frames{display:flex;gap:8px;overflow-x:auto;padding:12px;background:#18181b;border-top:1px solid #27272a}
+#frames img{width:96px;height:72px;object-fit:cover;border-radius:8px;border:2px solid transparent;cursor:pointer;flex-shrink:0}
+#frames img:hover{border-color:#52525b}
+#frames img.active{border-color:#7c3aed}
+input[type=file]{font-size:13px}
+input[type=text]{width:100%;background:#27272a;border:1px solid #3f3f46;color:#fff;padding:8px;border-radius:8px}
+</style>
+</head>
+<body>
+<header>
+  <h1>📸 Photo & Animation Studio <span class="badge">FREE OFFLINE</span></h1>
+  <div style="display:flex;gap:8px"><button class="btn small" onclick="downloadImage()">⬇ Download Image</button><button class="btn small primary" onclick="downloadAllFrames()">⬇ Export Frames</button></div>
+</header>
+<main>
+  <div id="left">
+    <label class="label">1. Upload</label>
+    <input type="file" id="upload" accept="image/*">
+    <div class="toolbar"><button class="btn small" onclick="document.getElementById('upload').click()">Choose Photo</button><button class="btn small" onclick="clearCanvas()">Clear</button></div>
+    
+    <label class="label">Filters (1-click)</label>
+    <div class="filters">
+      <div class="filter-card active" onclick="setFilter('none',this)">Original</div>
+      <div class="filter-card" onclick="setFilter('grayscale(1)',this)">Grayscale</div>
+      <div class="filter-card" onclick="setFilter('sepia(1)',this)">Sepia</div>
+      <div class="filter-card" onclick="setFilter('invert(1)',this)">Invert</div>
+      <div class="filter-card" onclick="setFilter('contrast(1.5) brightness(1.1)',this)">Vivid</div>
+      <div class="filter-card" onclick="setFilter('blur(3px)',this)">Blur</div>
+      <div class="filter-card" onclick="setFilter('sepia(0.5) contrast(1.2) brightness(1.1)',this)">Vintage</div>
+      <div class="filter-card" onclick="setFilter('saturate(2)',this)">Saturated</div>
+    </div>
+
+    <label class="label">Adjust</label>
+    Brightness <input type="range" id="bri" class="range" min="0" max="200" value="100" oninput="draw()">
+    Contrast <input type="range" id="con" class="range" min="0" max="200" value="100" oninput="draw()">
+    Saturation <input type="range" id="sat" class="range" min="0" max="300" value="100" oninput="draw()">
+    Hue <input type="range" id="hue" class="range" min="0" max="360" value="0" oninput="draw()">
+
+    <label class="label">Transform</label>
+    <div class="toolbar">
+      <button class="btn small" onclick="rotate(90)">Rotate 90°</button>
+      <button class="btn small" onclick="flipH()">Flip H</button>
+      <button class="btn small" onclick="flipV()">Flip V</button>
+    </div>
+
+    <label class="label">Add Text</label>
+    <input type="text" id="textInput" placeholder="Type text & press Add">
+    <div class="toolbar"><button class="btn small" onclick="addText()">+ Add Text</button><input type="color" id="textColor" value="#ffffff" style="width:36px;height:32px;padding:2px"></div>
+  </div>
+
+  <div id="center">
+    <div class="canvas-wrap">
+      <canvas id="canvas" width="720" height="480"></canvas>
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:#71717a">Tip: Edit photo → Add as Frame → Edit again → Add as Frame → Play animation</div>
+  </div>
+
+  <div id="right">
+    <label class="label">Animation Timeline</label>
+    <div style="font-size:12px;color:#a1a1aa;margin-bottom:8px">Each frame = current canvas state. Create stop-motion or photo animation.</div>
+    <div class="toolbar">
+      <button class="btn primary" onclick="addFrame()">+ Add Frame</button>
+      <button class="btn" onclick="play()">▶ Play</button>
+      <button class="btn" onclick="stop()">⏸ Stop</button>
+    </div>
+    <div class="toolbar">
+      FPS <input type="range" id="fps" min="1" max="24" value="6" style="width:100px"><span id="fpsVal" style="font-size:12px">6 fps</span>
+      <label style="font-size:12px"><input type="checkbox" id="onion"> Onion Skin</label>
+    </div>
+    <div id="frameCount" style="font-size:12px;color:#a1a1aa;margin:8px 0">0 frames</div>
+    <div class="toolbar">
+      <button class="btn small" onclick="duplicateLast()">Duplicate Last</button>
+      <button class="btn small" onclick="clearFrames()">Clear All Frames</button>
+    </div>
+    <label class="label">How export works (free)</label>
+    <div style="font-size:12px;line-height:1.5;color:#a1a1aa;background:#27272a;padding:10px;border-radius:8px">
+      This offline version saves each frame as PNG. To make GIF/MP4 for free:<br>
+      1. Click Export Frames<br>
+      2. Go to <b>ezgif.com/maker</b> (free) → upload frames → Make GIF<br>
+      Full version B will export GIF directly.
+    </div>
+  </div>
+</main>
+<div id="frames"></div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let img = null;
+let baseFilter = 'none';
+let rot = 0;
+let flipHv = 1, flipVv = 1;
+let texts = [];
+const bri = document.getElementById('bri'), con = document.getElementById('con'), sat = document.getElementById('sat'), hue = document.getElementById('hue');
+const fpsEl = document.getElementById('fps');
+
+fpsEl.oninput = () => document.getElementById('fpsVal').textContent = fpsEl.value + ' fps';
+
+document.getElementById('upload').onchange = e => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const url = URL.createObjectURL(file);
+  loadImage(url);
+};
+
+function loadImage(src){
+  img = new Image();
+  img.onload = () => {
+    canvas.width = img.width > 900 ? 900 : img.width;
+    canvas.height = img.height * (canvas.width / img.width);
+    if(canvas.height > 600){ canvas.height = 600; canvas.width = img.width * (600 / img.height); }
+    draw();
+  };
+  img.src = src;
+}
+
+function draw(){
+  if(!img) { ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle='#222'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle='#666'; ctx.font='14px sans-serif'; ctx.fillText('Upload a photo to start', canvas.width/2-70, canvas.height/2); return; }
+  ctx.save();
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const b = bri.value, c = con.value, s = sat.value, h = hue.value;
+  ctx.filter = `${baseFilter} brightness(${b}%) contrast(${c}%) saturate(${s}%) hue-rotate(${h}deg)`;
+  ctx.translate(canvas.width/2, canvas.height/2);
+  ctx.rotate(rot * Math.PI/180);
+  ctx.scale(flipHv, flipVv);
+  ctx.drawImage(img, -canvas.width/2, -canvas.height/2, canvas.width, canvas.height);
+  // draw texts
+  ctx.filter = 'none';
+  ctx.scale(1,1);
+  texts.forEach(t=>{
+    ctx.font = `${t.size}px Inter`;
+    ctx.fillStyle = t.color;
+    ctx.fillText(t.txt, t.x - canvas.width/2, t.y - canvas.height/2);
+  });
+  ctx.restore();
+}
+
+function setFilter(f, el){
+  baseFilter = f;
+  document.querySelectorAll('.filter-card').forEach(c=>c.classList.remove('active'));
+  if(el) el.classList.add('active');
+  draw();
+}
+function rotate(d){ rot = (rot + d) % 360; draw(); }
+function flipH(){ flipHv *= -1; draw(); }
+function flipV(){ flipVv *= -1; draw(); }
+function clearCanvas(){ img=null; texts=[]; draw(); }
+
+function addText(){
+  const txt = document.getElementById('textInput').value;
+  if(!txt) return;
+  const color = document.getElementById('textColor').value;
+  texts.push({txt, color, x: canvas.width/2 + (Math.random()*100-50), y: canvas.height/2 + (Math.random()*100-50), size: 32});
+  document.getElementById('textInput').value='';
+  draw();
+}
+
+// Animation
+let frames = [];
+let playInterval = null;
+let onionCache = null;
+
+function addFrame(){
+  if(!img){ alert('Upload a photo first'); return; }
+  frames.push(canvas.toDataURL('image/png'));
+  updateFramesUI();
+}
+function updateFramesUI(){
+  const wrap = document.getElementById('frames');
+  wrap.innerHTML='';
+  frames.forEach((src,i)=>{
+    const im = document.createElement('img');
+    im.src = src;
+    im.title = 'Frame '+(i+1)+' - click to load, right-click to delete';
+    im.onclick = ()=> loadImage(src);
+    im.oncontextmenu = (e)=>{ e.preventDefault(); frames.splice(i,1); updateFramesUI(); return false; };
+    wrap.appendChild(im);
+  });
+  document.getElementById('frameCount').textContent = frames.length + ' frames';
+}
+function duplicateLast(){ if(frames.length){ frames.push(frames[frames.length-1]); updateFramesUI(); } }
+function clearFrames(){ frames=[]; updateFramesUI(); stop(); }
+function play(){
+  if(frames.length<2){ alert('Add at least 2 frames to play animation'); return; }
+  stop();
+  let idx=0;
+  const fps = parseInt(fpsEl.value);
+  const onion = document.getElementById('onion').checked;
+  playInterval = setInterval(()=>{
+    const src = frames[idx];
+    const tmp = new Image();
+    tmp.onload = ()=>{
+      // optional onion skin: draw previous at low opacity
+      if(onion && idx>0){
+        const prev = new Image();
+        prev.onload = ()=>{
+          ctx.globalAlpha=0.3;
+          ctx.drawImage(prev,0,0,canvas.width,canvas.height);
+          ctx.globalAlpha=1;
+          ctx.drawImage(tmp,0,0,canvas.width,canvas.height);
+        };
+        prev.src = frames[(idx-1+frames.length)%frames.length];
+      } else {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.drawImage(tmp,0,0,canvas.width,canvas.height);
+      }
+    };
+    tmp.src = src;
+    idx = (idx+1)%frames.length;
+  }, 1000/fps);
+}
+function stop(){ clearInterval(playInterval); playInterval=null; draw(); }
+function downloadImage(){
+  if(!img){ alert('Nothing to download'); return; }
+  const a=document.createElement('a'); a.download='edited-photo.png'; a.href=canvas.toDataURL(); a.click();
+}
+function downloadAllFrames(){
+  if(!frames.length){ alert('No frames to export - add frames first'); return; }
+  frames.forEach((src,i)=>{
+    const a=document.createElement('a'); a.download=`frame-${i+1}.png`; a.href=src; a.click();
+  });
+}
+draw();
+</script>
+</body>
+</html>

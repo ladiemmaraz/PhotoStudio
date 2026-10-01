@@ -1,0 +1,26 @@
+{
+  "name": "photo-animation-studio",
+  "version": "1.0.0",
+  "description": "Photo & Animation Studio - Free Offline",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build-mac": "electron-builder --mac --x64 --arm64",
+    "build-win": "electron-builder --win --x64"
+  },
+  "build": {
+    "appId": "com.roshani.photostudio",
+    "productName": "PhotoStudio",
+    "files": [
+      "main.js",
+      "index.html"
+    ]
+  },
+  "devDependencies": {
+    "electron": "^28.3.3",
+    "electron-builder": "^24.9.1"
+  },
+  "allowScripts": {
+    "electron@28.3.3": true
+  }
+}
