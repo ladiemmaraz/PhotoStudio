@@ -1,26 +1,37 @@
 {
-  "name": "photo-animation-studio",
-  "version": "1.0.0",
-  "description": "Photo & Animation Studio - Free Offline",
+  "name": "photostudio-pro",
+  "version": "1.1.0",
+  "description": "PhotoStudio Pro - Premium Photo & Animation Editor with Kurdish Fonts, Remove BG, 4K Export",
   "main": "main.js",
+  "author": "ladiemmaraz",
+  "license": "MIT",
+  "private": true,
   "scripts": {
     "start": "electron .",
-    "build-mac": "electron-builder --mac --x64 --arm64",
-    "build-win": "electron-builder --win --x64"
+    "build-mac": "electron-builder --mac dmg --x64 --arm64",
+    "build-win": "electron-builder --win nsis --x64",
+    "build": "electron-builder --mac --win"
   },
   "build": {
-    "appId": "com.roshani.photostudio",
-    "productName": "PhotoStudio",
-    "files": [
-      "main.js",
-      "index.html"
-    ]
+    "appId": "com.ladiemmaraz.photostudio.pro",
+    "productName": "PhotoStudio Pro",
+    "files": ["main.js", "index.html"],
+    "mac": {
+      "target": ["dmg"],
+      "category": "public.app-category.photography"
+    },
+    "win": {
+      "target": ["nsis"],
+      "icon": "icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    }
   },
   "devDependencies": {
-    "electron": "^28.3.3",
+    "electron": "^28.0.0",
     "electron-builder": "^24.9.1"
-  },
-  "allowScripts": {
-    "electron@28.3.3": true
   }
 }
